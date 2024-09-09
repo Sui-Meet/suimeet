@@ -102,7 +102,6 @@ module love::meet{
     //==============================================================================================
 
     public entry fun create_profile(
-        content: String, //blob_id
         state: &mut State,
         photo_blob: String,
         photo_url: String,
