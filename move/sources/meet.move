@@ -44,8 +44,9 @@ module love::meet{
         b36addr: String,
         photo_blob: String, //blob_id
         photo_url: String,
+        description: String, //max 50 words
+        contact: String, // tg/wechat
         likes: vector<ID>, //<profile_id of likers>
-        contact: String // tg/wechat
     }
 
     // OTW for display.
@@ -105,13 +106,26 @@ module love::meet{
         state: &mut State,
         photo_blob: String,
         photo_url: String,
-        contact: String,
+        //max 50 words, suggestion: age, gender, job, hobbies
+        description: String, 
+        contact: String, //tg/wechat
         ctx: &mut TxContext
     ){
         let owner = tx_context::sender(ctx);
         assert!(!table::contains(&state.accounts, owner), EProfileExist);
-        let new_profile = new(owner, photo_blob, photo_url, contact, ctx);
-        let id = object::uid_to_inner(&new_profile.id);
+        let uid = object::new(ctx);
+        let id = object::uid_to_inner(&uid);
+        let b36addr = to_b36(uid.uid_to_address());
+        let new_profile = Profile {
+            id: uid,
+            owner,
+            b36addr,
+            photo_blob,
+            photo_url,
+            description,
+            contact, // tg/wechat
+            likes: vector::empty(), //<profile_id of likers>
+        };
         transfer::share_object(new_profile);
         table::add(&mut state.accounts, owner, id);
         vector::push_back(&mut state.all_profiles, id);
@@ -119,20 +133,6 @@ module love::meet{
             id,
             owner,
         });
-    }
-
-    fun new(owner: address, photo_blob: String, photo_url: String, contact: String, ctx: &mut TxContext): Profile {
-        let id = object::new(ctx);
-        let b36addr = to_b36(id.uid_to_address());
-        Profile {
-            id,
-            owner,
-            b36addr,
-            photo_blob,
-            photo_url,
-            likes: vector::empty(), //<profile_id of likers>
-            contact // tg/wechat
-        }
     }
 
     public entry fun like_profile(
