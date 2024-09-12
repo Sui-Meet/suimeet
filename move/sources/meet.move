@@ -43,9 +43,7 @@ module love::meet{
         owner: address,
         b36addr: String,
         photo_blob: String, //blob_id
-        photo_url: String,
-        description: String, //max 50 words
-        contact: String, // tg/wechat
+        detail_blob: String, //
         likes: vector<ID>, //<profile_id of likers>
     }
 
@@ -79,8 +77,8 @@ module love::meet{
             b"https://{b36addr}.walrus.site".to_string(),
         );
         display.add(
-            b"image_url".to_string(),
-            b"{photo_url}+{id}".to_string(),
+            b"photo_blob".to_string(),
+            b"https://suimeet.jeffier2015.workers.dev/?blobId={photo_blob}".to_string(),
         );
         display.add(
             b"walrus site address".to_string(),
@@ -104,10 +102,7 @@ module love::meet{
     public entry fun create_profile(
         state: &mut State,
         photo_blob: String,
-        photo_url: String,
-        //max 50 words, suggestion: age, gender, job, hobbies
-        description: String, 
-        contact: String, //tg/wechat
+        detail_blob: String, 
         ctx: &mut TxContext
     ){
         let owner = tx_context::sender(ctx);
@@ -120,9 +115,7 @@ module love::meet{
             owner,
             b36addr,
             photo_blob,
-            photo_url,
-            description,
-            contact, // tg/wechat
+            detail_blob,
             likes: vector::empty(), //<profile_id of likers>
         };
         transfer::share_object(new_profile);
